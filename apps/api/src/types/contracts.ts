@@ -1,5 +1,13 @@
 export type Permission = "view" | "edit";
 
+export type ErrorEnvelope = {
+  error: {
+    code: string;
+    message: string;
+    details?: string | null;
+  };
+};
+
 export type CompileError = {
   line: number;
   column: number;

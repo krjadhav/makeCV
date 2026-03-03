@@ -1,9 +1,15 @@
 import assert from "node:assert/strict";
-import { joinSession, publishOperation, resetSessions } from "../src/realtime/sessionServer.js";
 import { canMutate } from "../src/auth/shareAccess.js";
+import { joinSession, publishOperation, resetSessions } from "../src/realtime/sessionServer.js";
+import { createShareLink, resetShareState } from "../src/routes/shareLinks.js";
 
 export function runSharingPermissionsTests() {
   resetSessions();
+  resetShareState();
+
+  const created = createShareLink({ documentId: "doc-p", permission: "edit" });
+  assert.equal(created.statusCode, 201);
+
   joinSession({ documentId: "doc-p", clientId: "owner", permission: "edit", onEvent: () => {} });
   joinSession({ documentId: "doc-p", clientId: "viewer", permission: "view", onEvent: () => {} });
 

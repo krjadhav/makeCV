@@ -6,9 +6,33 @@ function nextShareId() {
   return `share_${String(linkCounter).padStart(6, "0")}`;
 }
 
+function errorEnvelope(code, message, details = null) {
+  return {
+    error: {
+      code,
+      message,
+      details
+    }
+  };
+}
+
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
 export function createShareLink({ documentId, permission }) {
+  if (!isNonEmptyString(documentId)) {
+    return {
+      statusCode: 400,
+      body: errorEnvelope("validation_error", "documentId is required")
+    };
+  }
+
   if (permission !== "view" && permission !== "edit") {
-    throw new Error("permission must be view or edit");
+    return {
+      statusCode: 400,
+      body: errorEnvelope("validation_error", "permission must be view or edit")
+    };
   }
 
   const id = nextShareId();
@@ -21,11 +45,33 @@ export function createShareLink({ documentId, permission }) {
     url: `https://app.example.com/share/${token}`
   };
   links.set(token, value);
-  return value;
+
+  return {
+    statusCode: 201,
+    body: value
+  };
 }
 
 export function resolveShareLink(token) {
-  return links.get(token) ?? null;
+  if (!isNonEmptyString(token)) {
+    return {
+      statusCode: 400,
+      body: errorEnvelope("validation_error", "token is required")
+    };
+  }
+
+  const value = links.get(token);
+  if (!value) {
+    return {
+      statusCode: 404,
+      body: errorEnvelope("not_found", "share link not found")
+    };
+  }
+
+  return {
+    statusCode: 200,
+    body: value
+  };
 }
 
 export function resetShareState() {
