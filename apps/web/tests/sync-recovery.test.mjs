@@ -1,16 +1,22 @@
 import assert from "node:assert/strict";
-import { applyServerAck, createSyncState, recoverFromSnapshot } from "../src/collab/syncState.js";
+import { applyReconnectOutcome, applyServerAck, createSyncState, recoverFromSnapshot } from "../src/collab/syncState.js";
 
 export function runSyncRecoveryTests() {
-  const state = createSyncState();
+  let state = createSyncState();
 
-  const conflicted = applyServerAck(state, {
+  state = applyServerAck(state, {
     ack: "conflict",
     revisionId: "r4"
   });
-  assert.equal(conflicted.needsResync, true);
+  assert.equal(state.needsResync, true);
 
-  const recovered = recoverFromSnapshot(conflicted, {
+  state = applyReconnectOutcome(state, { reconnected: false });
+  assert.equal(state.reconnecting, true);
+
+  state = applyReconnectOutcome(state, { reconnected: true });
+  assert.equal(state.reconnecting, false);
+
+  const recovered = recoverFromSnapshot(state, {
     revisionId: "r4"
   });
   assert.equal(recovered.needsResync, false);

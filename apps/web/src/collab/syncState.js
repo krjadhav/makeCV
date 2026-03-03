@@ -1,7 +1,8 @@
 export function createSyncState() {
   return {
     revisionId: "r0",
-    needsResync: false
+    needsResync: false,
+    reconnecting: false
   };
 }
 
@@ -21,10 +22,26 @@ export function applyServerAck(state, ack) {
   };
 }
 
+export function applyReconnectOutcome(state, outcome) {
+  if (!outcome.reconnected) {
+    return {
+      ...state,
+      reconnecting: true,
+      needsResync: true
+    };
+  }
+
+  return {
+    ...state,
+    reconnecting: false
+  };
+}
+
 export function recoverFromSnapshot(state, snapshot) {
   return {
     ...state,
     revisionId: snapshot.revisionId,
-    needsResync: false
+    needsResync: false,
+    reconnecting: false
   };
 }

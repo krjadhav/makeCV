@@ -4,9 +4,14 @@ import { applyServerAck, createSyncState, recoverFromSnapshot } from "../src/col
 
 export function runRealtimeCollabTests() {
   const events = [];
+  let failedOnce = false;
   const adapter = {
     subscribe(params) {
       events.push(["subscribe", params]);
+      if (!failedOnce) {
+        failedOnce = true;
+        throw new Error("temporary disconnect");
+      }
       return {
         joined: { type: "joined", params },
         unsubscribe() {
@@ -24,7 +29,9 @@ export function runRealtimeCollabTests() {
   };
 
   const client = createSessionClient(adapter);
-  client.connect({ documentId: "doc-e2e", clientId: "A" });
+  const reconnectOutcome = client.reconnectWithRetry({ documentId: "doc-e2e", clientId: "A" }, { maxRetries: 2 });
+  assert.equal(reconnectOutcome.reconnected, true);
+
   const accepted = client.publish({ opId: "ok", revisionId: "r1" });
   assert.equal(accepted.ack, "accepted");
 
@@ -35,7 +42,6 @@ export function runRealtimeCollabTests() {
   state = recoverFromSnapshot(state, { revisionId: "r4" });
   assert.equal(state.needsResync, false);
 
-  client.reconnect({ documentId: "doc-e2e", clientId: "A" });
   client.disconnect();
   assert.ok(events.some((item) => item[0] === "unsubscribe"));
 }

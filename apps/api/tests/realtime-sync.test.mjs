@@ -28,6 +28,14 @@ export function runRealtimeSyncE2ETests() {
     revisionId: "r1"
   });
 
+  const duplicate = publishOperation({
+    documentId: "doc-e2e",
+    opId: "op-1",
+    authorId: "A",
+    baseRevisionId: "r1",
+    revisionId: "r2"
+  });
+
   const ack2 = publishOperation({
     documentId: "doc-e2e",
     opId: "op-2",
@@ -37,6 +45,7 @@ export function runRealtimeSyncE2ETests() {
   });
 
   assert.equal(ack1.ack, "accepted");
+  assert.equal(duplicate.ack, "duplicate");
   assert.equal(ack2.ack, "accepted");
   assert.equal(clientBInbox.length, 1);
   assert.equal(clientAInbox.length, 1);

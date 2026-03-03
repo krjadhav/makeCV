@@ -3,9 +3,14 @@ import { createSessionClient } from "../src/collab/sessionClient.js";
 
 export function runRealtimeClientTests() {
   const calls = [];
+  let failures = 1;
   const adapter = {
     subscribe(params) {
       calls.push(["subscribe", params]);
+      if (failures > 0) {
+        failures -= 1;
+        throw new Error("network timeout");
+      }
       return {
         joined: { type: "joined", params },
         unsubscribe() {
@@ -20,8 +25,9 @@ export function runRealtimeClientTests() {
   };
 
   const client = createSessionClient(adapter);
-  const joined = client.connect({ documentId: "doc-r", clientId: "A" });
-  assert.equal(joined.type, "joined");
+  const first = client.reconnectWithRetry({ documentId: "doc-r", clientId: "A" }, { maxRetries: 2 });
+  assert.equal(first.reconnected, true);
+  assert.equal(first.attempts, 2);
 
   const ack = client.publish({ opId: "op-1" });
   assert.equal(ack.ack, "accepted");
