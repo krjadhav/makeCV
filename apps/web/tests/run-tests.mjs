@@ -2,6 +2,7 @@ import { runPreviewTests } from "./preview.test.mjs";
 import { runCompileFeedbackTests } from "./compile-feedback.test.mjs";
 import { runShareDownloadTests } from "./share-download.test.mjs";
 import { runRealtimeClientTests } from "./realtime-client.test.mjs";
+import { runSyncRecoveryTests } from "./sync-recovery.test.mjs";
 
 const mode = process.argv.slice(2).join(" ");
 
@@ -19,6 +20,10 @@ if (!mode || mode.includes("share") || mode.includes("download")) {
 
 if (!mode || mode.includes("realtime-client")) {
   runRealtimeClientTests();
+}
+
+if (!mode || mode.includes("sync-recovery")) {
+  runSyncRecoveryTests();
 }
 
 console.log(`web tests passed (${mode || "all"})`);

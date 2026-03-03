@@ -2,6 +2,7 @@ import { runCompileTests } from "./compile.test.mjs";
 import { runContractsTests } from "./contracts.test.mjs";
 import { runDownloadShareTests } from "./download-share.test.mjs";
 import { runRealtimeTests } from "./realtime.test.mjs";
+import { runSyncConflictTests } from "./sync-conflicts.test.mjs";
 
 const mode = process.argv.slice(2).join(" ");
 
@@ -19,6 +20,10 @@ if (!mode || mode.includes("download") || mode.includes("share")) {
 
 if (!mode || mode.includes("realtime")) {
   runRealtimeTests();
+}
+
+if (!mode || mode.includes("sync-conflicts")) {
+  runSyncConflictTests();
 }
 
 console.log(`api tests passed (${mode || "all"})`);
