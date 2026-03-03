@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/share-link.schema.json",
+  "title": "ShareLink",
+  "type": "object",
+  "required": ["id", "url", "permission"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "permission": {
+      "type": "string",
+      "enum": ["view", "edit"]
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

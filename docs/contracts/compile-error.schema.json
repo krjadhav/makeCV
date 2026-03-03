@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/compile-error.schema.json",
+  "title": "CompileError",
+  "type": "object",
+  "required": ["line", "column", "message"],
+  "properties": {
+    "line": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "column": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["error", "warning"],
+      "default": "error"
+    },
+    "code": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

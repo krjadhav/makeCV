@@ -1,0 +1,187 @@
+openapi: 3.1.0
+info:
+  title: Collaborative LaTeX Editor API
+  version: 0.1.0
+servers:
+  - url: https://api.example.com
+paths:
+  /v1/documents/{documentId}/compile:
+    post:
+      summary: Request compilation for a document revision
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [revisionId, source]
+              properties:
+                revisionId:
+                  type: string
+                source:
+                  type: string
+      responses:
+        '202':
+          description: Compile job accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompileAccepted'
+
+  /v1/compiles/{compileId}:
+    get:
+      summary: Fetch compile status and result metadata
+      parameters:
+        - name: compileId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Compile status
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/CompileSuccess'
+                  - $ref: '#/components/schemas/CompileFailure'
+
+  /v1/documents/{documentId}/preview:
+    get:
+      summary: Retrieve latest successful preview metadata
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: Preview ready
+        '409':
+          description: Preview blocked due to compile errors
+
+  /v1/documents/{documentId}/share-links:
+    post:
+      summary: Create share link with permission
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareLinkCreate'
+      responses:
+        '201':
+          description: Share link created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLink'
+
+  /v1/documents/{documentId}/download/pdf:
+    get:
+      summary: Download latest successful PDF artifact
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200':
+          description: PDF stream
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '409':
+          description: No successful compile artifact available
+
+components:
+  parameters:
+    DocumentId:
+      name: documentId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    CompileAccepted:
+      type: object
+      required: [compileId, status]
+      properties:
+        compileId:
+          type: string
+        status:
+          type: string
+          enum: [queued]
+
+    CompileSuccess:
+      type: object
+      required: [compileId, status, revisionId, previewUrl, pdfUrl]
+      properties:
+        compileId:
+          type: string
+        status:
+          type: string
+          enum: [succeeded]
+        revisionId:
+          type: string
+        previewUrl:
+          type: string
+        pdfUrl:
+          type: string
+
+    CompileFailure:
+      type: object
+      required: [compileId, status, revisionId, errors]
+      properties:
+        compileId:
+          type: string
+        status:
+          type: string
+          enum: [failed]
+        revisionId:
+          type: string
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompileError'
+
+    CompileError:
+      type: object
+      required: [line, column, message]
+      properties:
+        line:
+          type: integer
+          minimum: 1
+        column:
+          type: integer
+          minimum: 1
+        message:
+          type: string
+
+    ShareLinkCreate:
+      type: object
+      required: [permission]
+      properties:
+        permission:
+          type: string
+          enum: [view, edit]
+        expiresAt:
+          type: string
+          format: date-time
+
+    ShareLink:
+      type: object
+      required: [id, url, permission]
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+        permission:
+          type: string
+          enum: [view, edit]
+        expiresAt:
+          type: string
+          format: date-time
