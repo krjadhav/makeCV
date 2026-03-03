@@ -6,21 +6,24 @@ Run these checks before marking a task complete.
 
 - `npm run -s lint --workspaces --if-present`
 
-## 2) Phase 2 Quality Gates
+## 2) Core Quality Gates
 
 - `npm run -s test:compile-feedback`
 - `npm run -s test:preview-gating`
+
+## 3) Collaboration Quality Gates
+
 - `npm run -s test:realtime-sync`
 - `npm run -s test:sharing-permissions`
 
-## 3) Manual Validation
+## 4) Manual Validation
 
-- Confirm compile errors surface with line/column markers in editor feedback.
-- Confirm preview remains blocked or stale when latest compile fails.
-- Confirm successful compile enables PDF download.
-- Confirm share links preserve `view` and `edit` permissions.
+- Confirm two editors can collaborate in one session and both receive updates.
+- Confirm conflict acknowledgements trigger client resync behavior.
+- Confirm `view` share links stay read-only in realtime and mutation flows.
+- Confirm collaborator presence list updates for join/leave activity.
 
-## 4) Completion Bundle
+## 5) Completion Bundle
 
 Run full verification bundle for phase completion:
 

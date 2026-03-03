@@ -6,6 +6,7 @@ import { runSyncRecoveryTests } from "./sync-recovery.test.mjs";
 import { runAccessGuardTests } from "./access-guard.test.mjs";
 import { runPresenceTests } from "./presence.test.mjs";
 import { runEditorCollabTests } from "./editor-collab.test.mjs";
+import { runRealtimeCollabTests } from "./realtime-collab.test.mjs";
 
 const mode = process.argv.slice(2).join(" ");
 
@@ -39,6 +40,10 @@ if (!mode || mode.includes("presence")) {
 
 if (!mode || mode.includes("editor-collab")) {
   await runEditorCollabTests();
+}
+
+if (!mode || mode.includes("realtime-collab")) {
+  runRealtimeCollabTests();
 }
 
 console.log(`web tests passed (${mode || "all"})`);

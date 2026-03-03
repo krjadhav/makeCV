@@ -4,6 +4,7 @@ import { runDownloadShareTests } from "./download-share.test.mjs";
 import { runRealtimeTests } from "./realtime.test.mjs";
 import { runSyncConflictTests } from "./sync-conflicts.test.mjs";
 import { runSharingPermissionsTests } from "./sharing-permissions.test.mjs";
+import { runRealtimeSyncE2ETests } from "./realtime-sync.test.mjs";
 
 const mode = process.argv.slice(2).join(" ");
 
@@ -29,6 +30,10 @@ if (!mode || mode.includes("sync-conflicts")) {
 
 if (!mode || mode.includes("sharing-permissions")) {
   runSharingPermissionsTests();
+}
+
+if (!mode || mode.includes("realtime-sync")) {
+  runRealtimeSyncE2ETests();
 }
 
 console.log(`api tests passed (${mode || "all"})`);
