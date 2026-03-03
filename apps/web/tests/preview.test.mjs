@@ -14,6 +14,7 @@ export function runPreviewTests() {
     errors: [{ line: 1, column: 1, message: "x" }]
   });
   assert.equal(blocked.status, PreviewStates.BLOCKED);
+  assert.match(blocked.reason, /preview blocked/);
 
   const success = applyCompileResult(initial, {
     status: "succeeded",
@@ -27,4 +28,5 @@ export function runPreviewTests() {
     errors: [{ line: 2, column: 2, message: "broken" }]
   });
   assert.equal(stale.status, PreviewStates.STALE);
+  assert.match(stale.reason, /preview blocked/);
 }

@@ -5,16 +5,41 @@ export function mapCompileErrors(errors) {
   }));
 }
 
+const compileMessages = {
+  idle: "Ready to compile",
+  loading: "Compiling LaTeX document...",
+  succeeded: "Compilation succeeded",
+  failed: "Compilation failed. Fix highlighted errors and retry."
+};
+
 export function createCompilePanelModel(result) {
+  if (!result || result.status === "idle") {
+    return {
+      state: "idle",
+      heading: compileMessages.idle,
+      markers: []
+    };
+  }
+
+  if (result.status === "loading" || result.status === "queued") {
+    return {
+      state: "loading",
+      heading: compileMessages.loading,
+      markers: []
+    };
+  }
+
   if (result.status === "failed") {
     return {
-      heading: "Compilation failed",
-      markers: mapCompileErrors(result.errors)
+      state: "failed",
+      heading: compileMessages.failed,
+      markers: mapCompileErrors(result.errors ?? [])
     };
   }
 
   return {
-    heading: "Compilation succeeded",
+    state: "succeeded",
+    heading: compileMessages.succeeded,
     markers: []
   };
 }

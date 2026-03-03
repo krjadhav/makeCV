@@ -10,8 +10,9 @@ export function createEditorController(apiClient) {
       status: PreviewStates.IDLE,
       currentRevisionId: null,
       previewUrl: null,
-      reason: null
+      reason: "Ready to compile"
     },
+    compileUi: createCompilePanelModel({ status: "idle" }),
     diagnostics: [],
     collaborators: createCollaboratorBarModel([])
   };
@@ -19,11 +20,14 @@ export function createEditorController(apiClient) {
   return {
     state,
     async compileDocument({ documentId, revisionId, source }) {
+      state.compileUi = createCompilePanelModel({ status: "loading" });
+
       const accepted = await apiClient.requestCompile({ documentId, revisionId, source });
       const result = await apiClient.getCompileStatus(accepted.compileId);
 
       state.preview = applyCompileResult(state.preview, result);
-      state.diagnostics = createCompilePanelModel(result).markers;
+      state.compileUi = createCompilePanelModel(result);
+      state.diagnostics = state.compileUi.markers;
 
       return { ...state };
     },

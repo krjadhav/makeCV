@@ -22,6 +22,8 @@ export async function runCompileFeedbackTests() {
   });
 
   assert.equal(state.preview.status, "blocked");
+  assert.equal(state.compileUi.state, "failed");
+  assert.match(state.compileUi.heading, /Fix highlighted errors/);
   assert.equal(state.diagnostics[0].marker, "12:4");
   assert.equal(state.diagnostics[0].message, "unexpected token");
 }
