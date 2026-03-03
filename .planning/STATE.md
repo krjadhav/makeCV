@@ -2,7 +2,7 @@
 
 ## Phase
 
-Phase 3 of 4
+Phase 4 of 4
 
 ## Status
 
@@ -30,11 +30,11 @@ complete
 
 ## Next Action
 
-Run `$atlas:status` to choose the next milestone action.
+Run `$atlas:status` to confirm project completion and next decisions.
 
 ## Current Plan
 
-03-PLAN.md
+04-PLAN.md
 
 ## Deferred Issues
 
