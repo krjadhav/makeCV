@@ -7,6 +7,10 @@
     "dev": "node ./src/main.tsx",
     "build": "node ./scripts/build.mjs",
     "test": "node ./tests/run-tests.mjs",
+    "test:preview": "node ./tests/run-tests.mjs preview",
+    "test:compile-feedback": "node ./tests/run-tests.mjs compile-feedback",
+    "test:share": "node ./tests/run-tests.mjs share",
+    "test:download": "node ./tests/run-tests.mjs download",
     "lint": "node ./scripts/lint.mjs"
   }
 }
