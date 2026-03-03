@@ -1,0 +1,12 @@
+{
+  "name": "@cv-maker/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node ./src/main.tsx",
+    "build": "node ./scripts/build.mjs",
+    "test": "node ./tests/run-tests.mjs",
+    "lint": "node ./scripts/lint.mjs"
+  }
+}

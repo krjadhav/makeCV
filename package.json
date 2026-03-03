@@ -1,0 +1,15 @@
+{
+  "name": "cv-maker",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "lint": "npm run -s lint --workspaces --if-present",
+    "build": "npm run -s build --workspaces --if-present",
+    "test": "npm run -s test --workspaces --if-present"
+  }
+}
