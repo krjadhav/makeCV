@@ -15,6 +15,7 @@ export function createShareLink({ documentId, permission }) {
   const token = `${id}_token`;
   const value = {
     id,
+    token,
     documentId,
     permission,
     url: `https://app.example.com/share/${token}`

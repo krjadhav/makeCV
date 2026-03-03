@@ -1,3 +1,4 @@
+import { canJoinSession, canMutate } from "../auth/shareAccess.js";
 import { resolveOperation } from "./conflictResolver.js";
 
 const sessions = new Map();
@@ -29,14 +30,19 @@ function getSession(documentId) {
   return sessions.get(documentId);
 }
 
-export function joinSession({ documentId, clientId, onEvent }) {
+export function joinSession({ documentId, clientId, onEvent, permission = "edit" }) {
+  if (!canJoinSession(permission)) {
+    return { type: "denied", reason: "invalid permission", documentId, clientId };
+  }
+
   const session = getSession(documentId);
-  session.clients.set(clientId, onEvent);
+  session.clients.set(clientId, { onEvent, permission });
 
   return {
     type: "joined",
     documentId,
     clientId,
+    permission,
     peers: Array.from(session.clients.keys()),
     revisionId: session.revisionId
   };
@@ -51,6 +57,11 @@ export function leaveSession({ documentId, clientId }) {
 export function publishOperation(operation) {
   const { documentId, opId, revisionId, authorId } = operation;
   const session = getSession(documentId);
+  const author = session.clients.get(authorId);
+
+  if (!author || !canMutate(author.permission)) {
+    return { ack: "forbidden", opId, revisionId: session.revisionId };
+  }
 
   const resolution = resolveOperation({
     sessionRevisionId: session.revisionId,
@@ -69,9 +80,9 @@ export function publishOperation(operation) {
   session.store.add(opId);
   session.revisionId = revisionId;
 
-  for (const [clientId, listener] of session.clients.entries()) {
+  for (const [clientId, peer] of session.clients.entries()) {
     if (clientId !== authorId) {
-      listener({ type: "operation", payload: operation });
+      peer.onEvent({ type: "operation", payload: operation });
     }
   }
 
