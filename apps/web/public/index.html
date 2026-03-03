@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>makeCV Local</title>
+  <style>
+    :root { --bg:#f7f5ef; --ink:#1d1c1a; --accent:#0f766e; --muted:#6b7280; --warn:#b45309; --err:#b91c1c; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: ui-sans-serif, -apple-system, Segoe UI, sans-serif; background: var(--bg); color: var(--ink); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    .sub { color: var(--muted); margin: 0 0 20px; }
+    .grid { display:grid; grid-template-columns: 1.1fr 0.9fr; gap:16px; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:14px; }
+    textarea { width:100%; min-height:360px; border:1px solid #d1d5db; border-radius:10px; padding:12px; font: 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin: 10px 0; }
+    button { border:0; border-radius:10px; padding:10px 14px; background: var(--accent); color:#fff; cursor:pointer; font-weight:600; }
+    button[disabled] { opacity:.55; cursor:not-allowed; }
+    .pill { font-size:12px; padding:4px 8px; border-radius:999px; background:#eef2ff; color:#3730a3; }
+    .pill.error { background:#fee2e2; color:#991b1b; }
+    .errors { margin-top:10px; padding:10px; border-left:4px solid var(--err); background:#fef2f2; border-radius:8px; }
+    .preview { min-height:180px; border:1px dashed #d1d5db; border-radius:10px; padding:12px; background:#fafafa; }
+    code { background:#f3f4f6; padding:2px 6px; border-radius:6px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>makeCV LaTeX Editor (Local)</h1>
+    <p class="sub">Local runtime with compile feedback, preview gating, share links, and PDF download simulation.</p>
+    <div class="grid">
+      <section class="card">
+        <div class="row">
+          <span id="compileState" class="pill">idle</span>
+          <span id="previewState" class="pill">preview: idle</span>
+        </div>
+        <textarea id="editor">\\begin{document}
+Hello from makeCV local
+\\end{document}</textarea>
+        <div class="row">
+          <button id="compileBtn">Compile</button>
+          <button id="downloadBtn" disabled>Download PDF</button>
+        </div>
+        <div id="errors" class="errors" hidden></div>
+      </section>
+
+      <aside class="card">
+        <h3>Preview</h3>
+        <div id="preview" class="preview">Compile to render preview.</div>
+        <hr />
+        <h3>Share</h3>
+        <div class="row">
+          <select id="permission">
+            <option value="view">view</option>
+            <option value="edit">edit</option>
+          </select>
+          <button id="shareBtn">Create Share Link</button>
+        </div>
+        <p id="shareOut" class="sub">No share link created yet.</p>
+      </aside>
+    </div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
+  <script type="module">
+    const editor = document.getElementById('editor');
+    const compileBtn = document.getElementById('compileBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const compileState = document.getElementById('compileState');
+    const previewState = document.getElementById('previewState');
+    const errors = document.getElementById('errors');
+    const preview = document.getElementById('preview');
+    const permission = document.getElementById('permission');
+    const shareBtn = document.getElementById('shareBtn');
+    const shareOut = document.getElementById('shareOut');
+
+    let latest = { documentId: 'doc-local', revisionId: 'r0', pdfUrl: null, previewUrl: null };
+
+    function setStates(cState, pState, pClass = '') {
+      compileState.textContent = cState;
+      previewState.textContent = `preview: ${pState}`;
+      compileState.className = `pill ${pClass}`.trim();
+      previewState.className = `pill ${pClass}`.trim();
+    }
+
+    function showErrors(list) {
+      if (!list || list.length === 0) {
+        errors.hidden = true;
+        errors.innerHTML = '';
+        return;
+      }
+      errors.hidden = false;
+      errors.innerHTML = `<strong>Compile errors</strong><ul>${list.map(e => `<li>line ${e.line}, col ${e.column}: ${e.message}</li>`).join('')}</ul>`;
+    }
+
+    function renderLatex(source, revisionId) {
+      try {
+        const generator = new latexjs.HtmlGenerator({ hyphenate: false });
+        latexjs.parse(source, { generator });
+        preview.innerHTML = '';
+        const title = document.createElement('h4');
+        title.textContent = `Compiled Preview (${revisionId})`;
+        preview.appendChild(title);
+        preview.appendChild(generator.domFragment());
+      } catch (error) {
+        preview.textContent = `Preview render failed: ${error.message}`;
+      }
+    }
+
+    compileBtn.addEventListener('click', async () => {
+      const revisionId = `r${Date.now()}`;
+      latest.revisionId = revisionId;
+      setStates('loading', 'idle');
+      showErrors([]);
+
+      const compileResp = await fetch('/api/compile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: latest.documentId, revisionId, source: editor.value })
+      });
+      const compileData = await compileResp.json();
+      if (!compileResp.ok) {
+        setStates('failed', 'blocked', 'error');
+        preview.textContent = compileData.error?.message || 'Compile request failed';
+        return;
+      }
+
+      const statusResp = await fetch(`/api/compile/${compileData.compileId}`);
+      const statusData = await statusResp.json();
+      if (!statusResp.ok) {
+        setStates('failed', 'blocked', 'error');
+        preview.textContent = statusData.error?.message || 'Compile status failed';
+        return;
+      }
+
+      if (statusData.status === 'failed') {
+        setStates('failed', 'blocked', 'error');
+        showErrors(statusData.errors || []);
+        preview.textContent = 'Preview blocked due to compile errors.';
+        downloadBtn.disabled = true;
+        return;
+      }
+
+      latest.pdfUrl = statusData.pdfUrl;
+      latest.previewUrl = statusData.previewUrl;
+      const previewResp = await fetch(`/api/preview/${latest.documentId}`);
+      const previewData = await previewResp.json();
+      setStates('succeeded', 'success');
+      if (previewResp.ok) {
+        renderLatex(previewData.source, previewData.revisionId);
+      } else {
+        preview.textContent = `Preview unavailable: ${previewData.error?.message || 'unknown error'}`;
+      }
+      downloadBtn.disabled = false;
+    });
+
+    downloadBtn.addEventListener('click', async () => {
+      const resp = await fetch(`/api/download/${latest.documentId}`);
+      const data = await resp.json();
+      if (!resp.ok) {
+        alert(data.error?.message || 'Download unavailable');
+        return;
+      }
+      alert(`Simulated download: ${data.pdfUrl}`);
+    });
+
+    shareBtn.addEventListener('click', async () => {
+      const resp = await fetch('/api/share-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: latest.documentId, permission: permission.value })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        shareOut.textContent = data.error?.message || 'Share failed';
+        return;
+      }
+      shareOut.innerHTML = `Share link (<code>${data.permission}</code>): <code>${data.url}</code>`;
+    });
+  </script>
+</body>
+</html>

@@ -65,6 +65,7 @@ export function requestCompile({ documentId, revisionId, source }) {
 
   const artifact = {
     revisionId,
+    source,
     previewUrl: `/artifacts/${documentId}/${revisionId}/preview.pdf`,
     pdfUrl: `/artifacts/${documentId}/${revisionId}/download.pdf`
   };
