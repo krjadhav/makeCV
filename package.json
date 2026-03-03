@@ -14,6 +14,7 @@
     "test:compile-feedback": "npm run -s test --workspace apps/web -- compile-feedback",
     "test:preview-gating": "npm run -s test --workspace apps/web -- preview",
     "test:realtime-sync": "npm run -s test --workspace apps/api -- realtime-sync && npm run -s test --workspace apps/web -- realtime-collab",
-    "test:sharing-permissions": "npm run -s test --workspace apps/api -- sharing-permissions && npm run -s test --workspace apps/web -- access-guard"
+    "test:sharing-permissions": "npm run -s test --workspace apps/api -- sharing-permissions && npm run -s test --workspace apps/web -- access-guard",
+    "verify:release": "npm run -s lint --workspaces --if-present && npm run -s test:compile-feedback && npm run -s test:preview-gating && npm run -s test:realtime-sync && npm run -s test:sharing-permissions"
   }
 }

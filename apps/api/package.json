@@ -9,8 +9,10 @@
     "test": "node ./tests/run-tests.mjs",
     "test:compile": "node ./tests/run-tests.mjs compile",
     "test:contracts": "node ./tests/run-tests.mjs contracts",
-    "test:share": "node ./tests/run-tests.mjs share",
+    "test:share": "node ./tests/run-tests.mjs share sharing-permissions",
     "test:download": "node ./tests/run-tests.mjs download",
+    "test:realtime": "node ./tests/run-tests.mjs realtime sync-conflicts realtime-sync",
+    "verify": "npm run -s lint && npm run -s test:compile && npm run -s test:contracts && npm run -s test:share && npm run -s test:download && npm run -s test:realtime",
     "lint": "node ./scripts/lint.mjs"
   }
 }

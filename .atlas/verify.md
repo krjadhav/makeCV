@@ -2,33 +2,22 @@
 
 Run these checks before marking a task complete.
 
-## 1) Lint
+## 1) Workspace Verification
 
-- `npm run -s lint --workspaces --if-present`
+- `npm run -s verify --workspace apps/web`
+- `npm run -s verify --workspace apps/api`
 
-## 2) Core Quality Gates
+## 2) Release Gate
 
-- `npm run -s test:compile-feedback`
-- `npm run -s test:preview-gating`
+- `npm run -s verify:release`
 
-## 3) Collaboration Quality Gates
+## 3) Manual Smoke Checks
 
-- `npm run -s test:realtime-sync`
-- `npm run -s test:sharing-permissions`
+- Confirm compile errors surface with consistent messaging in editor UI.
+- Confirm preview/download/share actions reflect success, blocked, and stale states correctly.
+- Confirm reconnect flow restores collaboration session and sync state.
+- Confirm view links remain read-only and edit links support realtime changes.
 
-## 4) Manual Validation
+## 4) Rollback Readiness
 
-- Confirm two editors can collaborate in one session and both receive updates.
-- Confirm conflict acknowledgements trigger client resync behavior.
-- Confirm `view` share links stay read-only in realtime and mutation flows.
-- Confirm collaborator presence list updates for join/leave activity.
-
-## 5) Completion Bundle
-
-Run full verification bundle for phase completion:
-
-- `npm run -s lint --workspaces --if-present`
-- `npm run -s test:compile-feedback`
-- `npm run -s test:preview-gating`
-- `npm run -s test:realtime-sync`
-- `npm run -s test:sharing-permissions`
+- If release gate fails, revert to last known good commit and rerun `npm run -s verify:release`.

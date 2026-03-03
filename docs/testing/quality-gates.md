@@ -28,7 +28,9 @@
 
 Run all quality checks before marking execution complete:
 
-- verify bundle command sequence is required for release readiness.
+- `npm run verify:release`
+
+### Included checks
 
 - `npm run lint`
 - `npm run test:compile-feedback`

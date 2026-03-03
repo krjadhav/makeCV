@@ -11,6 +11,8 @@
     "test:compile-feedback": "node ./tests/run-tests.mjs compile-feedback",
     "test:share": "node ./tests/run-tests.mjs share",
     "test:download": "node ./tests/run-tests.mjs download",
+    "test:realtime": "node ./tests/run-tests.mjs realtime-client sync-recovery realtime-collab",
+    "verify": "npm run -s lint && npm run -s test:preview && npm run -s test:compile-feedback && npm run -s test:share && npm run -s test:download && npm run -s test:realtime",
     "lint": "node ./scripts/lint.mjs"
   }
 }
