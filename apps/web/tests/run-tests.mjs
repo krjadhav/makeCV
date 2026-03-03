@@ -4,6 +4,8 @@ import { runShareDownloadTests } from "./share-download.test.mjs";
 import { runRealtimeClientTests } from "./realtime-client.test.mjs";
 import { runSyncRecoveryTests } from "./sync-recovery.test.mjs";
 import { runAccessGuardTests } from "./access-guard.test.mjs";
+import { runPresenceTests } from "./presence.test.mjs";
+import { runEditorCollabTests } from "./editor-collab.test.mjs";
 
 const mode = process.argv.slice(2).join(" ");
 
@@ -29,6 +31,14 @@ if (!mode || mode.includes("sync-recovery")) {
 
 if (!mode || mode.includes("access-guard")) {
   runAccessGuardTests();
+}
+
+if (!mode || mode.includes("presence")) {
+  runPresenceTests();
+}
+
+if (!mode || mode.includes("editor-collab")) {
+  await runEditorCollabTests();
 }
 
 console.log(`web tests passed (${mode || "all"})`);

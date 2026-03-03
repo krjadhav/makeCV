@@ -1,7 +1,10 @@
 import { createCompilePanelModel } from "./CompilePanel.js";
+import { createCollaboratorBarModel } from "./CollaboratorBar.js";
 import { applyCompileResult, PreviewStates } from "../state/previewState.js";
+import { createPresenceStore } from "../collab/presenceStore.js";
 
 export function createEditorController(apiClient) {
+  const presence = createPresenceStore();
   const state = {
     preview: {
       status: PreviewStates.IDLE,
@@ -9,7 +12,8 @@ export function createEditorController(apiClient) {
       previewUrl: null,
       reason: null
     },
-    diagnostics: []
+    diagnostics: [],
+    collaborators: createCollaboratorBarModel([])
   };
 
   return {
@@ -22,6 +26,21 @@ export function createEditorController(apiClient) {
       state.diagnostics = createCompilePanelModel(result).markers;
 
       return { ...state };
+    },
+    handlePresenceJoin(member) {
+      presence.join(member);
+      state.collaborators = createCollaboratorBarModel(presence.list());
+      return state.collaborators;
+    },
+    handlePresenceLeave(clientId) {
+      presence.leave(clientId);
+      state.collaborators = createCollaboratorBarModel(presence.list());
+      return state.collaborators;
+    },
+    handlePresenceHeartbeat(clientId) {
+      presence.heartbeat(clientId);
+      state.collaborators = createCollaboratorBarModel(presence.list());
+      return state.collaborators;
     }
   };
 }
