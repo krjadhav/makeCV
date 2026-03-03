@@ -2,7 +2,7 @@
 
 ## Phase
 
-Phase 1 of 4
+Phase 2 of 4
 
 ## Status
 
@@ -34,7 +34,7 @@ Run `$atlas:status` to choose the next milestone action.
 
 ## Current Plan
 
-01-PLAN.md
+02-PLAN.md
 
 ## Deferred Issues
 
